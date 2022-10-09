@@ -21,6 +21,9 @@ set_target_properties(
 
 add_executable(dot-selection
         "${PROJECT_SOURCE_DIR}/src/main.cpp"
+        "${PROJECT_SOURCE_DIR}/src/dot.cpp"
+        "${PROJECT_SOURCE_DIR}/src/brain.cpp"
+        "${PROJECT_SOURCE_DIR}/src/population.cpp"
 )
 
 target_link_libraries(dot-selection PRIVATE raylib::raylib)
