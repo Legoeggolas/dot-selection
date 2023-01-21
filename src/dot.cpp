@@ -1,23 +1,23 @@
 #include "../include/dot.hpp"
 
+Vec2 const Dot::default_pos{25, 25};
 raylib::Color const Dot::default_color = BLACK;
 float const Dot::default_radius = 3;
 size_t const Dot::default_brain_size = 1000;
+double const Dot::default_mutation_chance = 0.25;
 float const Dot::vel_lim = 10;
 
-Dot::Dot() : brain{Brain(default_brain_size)} {
-    pos = {(float)GetScreenWidth() / 10, (float)GetScreenHeight() / 10};
-    vel = {0, 0};
-    accel = {0, 0};
-    alive = true;
+Dot::Dot() : Dot(default_pos, default_brain_size) {
 }
 
-Dot::Dot(Vec2 _pos) : brain{Brain(default_brain_size)} {
-    Dot();
-    pos = _pos;
+Dot::Dot(Vec2 _pos, size_t brainSize) : Dot(_pos, brainSize, default_mutation_chance) {
 }
 
-Vec2 Dot::getPos() {
+Dot::Dot(Vec2 _pos, size_t brainSize, double chance) : brain{Brain(brainSize)}, mutationChance{chance} {
+    reset(_pos);
+}
+
+Vec2 Dot::getPos() const {
     return pos;
 }
 
@@ -47,10 +47,41 @@ void Dot::update() {
     accel = brain.getNextInstruction();
 }
 
-bool Dot::isAlive() {
+bool Dot::isAlive() const {
     return alive;
 }
 
 void Dot::kill() {
     alive = false;
+}
+
+void Dot::fitness(Vec2 const &ref) {
+    long double xdist = ref.x - pos.x;
+    long double ydist = ref.y - pos.y;
+    long double dist_sq = (xdist * xdist) + (ydist * ydist);
+
+    long double score = 1000000 / (1 + sqrt(dist_sq));
+
+    calculatedFitness = score;
+}
+
+/**
+ * @brief Mutates the brain of a dot with a given mutation chance for each step
+ *
+ */
+void Dot::mutate() {
+    brain.mutate(mutationChance);
+}
+
+void Dot::reset() {
+    reset(default_pos);
+}
+
+void Dot::reset(Vec2 _pos) {
+    pos = _pos;
+    vel = {0, 0};
+    accel = {0, 0};
+    alive = true;
+    calculatedFitness = 0;
+    brain.reset();
 }

@@ -11,20 +11,11 @@ Brain::Brain(size_t _vectors) {
         std::begin(directions), std::end(directions), [&dist, &engine]() -> Vec2 {
             return {cosf(dist(engine)), sinf(dist(engine))};
         });
-
-    /*
-    #ifdef CON
-        CPRINT("Generated Brain with directions:\n");
-        for (auto const &ele : directions) {
-            CPRINT(ele.GetX() << ", " << ele.GetY() << "\n");
-        }
-    #endif
-    */
 }
 
 Vec2 Brain::getNextInstruction() {
     if (steps >= directions.size()) {
-        return *directions.end();
+        return directions.back();
     }
 
     return directions[steps++];
@@ -32,4 +23,23 @@ Vec2 Brain::getNextInstruction() {
 
 size_t Brain::getStepCount() {
     return steps;
+}
+
+void Brain::reset() {
+    steps = 0;
+}
+
+void Brain::mutate(double chance) {
+    std::random_device device;
+    std::mt19937 engine(device());
+    std::uniform_real_distribution<double> mutationRoll{0.00, 1.00},
+        directionRoll{0, 2 * PI};
+
+    for (auto &dir : directions) {
+        if (mutationRoll(engine) > chance) {
+            continue;
+        }
+
+        dir = directionRoll(engine);
+    }
 }
